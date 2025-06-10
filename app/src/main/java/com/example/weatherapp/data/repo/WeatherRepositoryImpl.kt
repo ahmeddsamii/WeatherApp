@@ -1,10 +1,10 @@
 package com.example.weatherapp.data.repo
 
 import com.example.weatherapp.data.datasource.remote.RemoteDataSource
+import com.example.weatherapp.data.repo.mapper.toWeatherResponse
 import com.example.weatherapp.domain.entity.CityLocation
 import com.example.weatherapp.domain.entity.WeatherResponse
 import com.example.weatherapp.domain.repo.WeatherRepository
-import com.example.weatherapp.data.repo.mapper.toWeatherResponse
 import com.example.weatherapp.domain.utils.FetchingWeatherException
 import com.example.weatherapp.domain.utils.UnexpectedErrorException
 import com.example.weatherapp.domain.utils.WeatherNetworkException

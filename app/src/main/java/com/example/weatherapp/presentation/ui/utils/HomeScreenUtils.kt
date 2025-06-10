@@ -10,10 +10,6 @@ import androidx.palette.graphics.Palette
 import com.example.weatherapp.R
 import com.example.weatherapp.domain.entity.WeatherCardDetails
 import com.example.weatherapp.presentation.state.mapper.WeatherUiState
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 object HomeScreenUtils {
     fun splitTodaySectionTime(time: String): String {
