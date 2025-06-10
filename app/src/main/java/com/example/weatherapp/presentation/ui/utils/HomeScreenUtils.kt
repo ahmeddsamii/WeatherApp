@@ -11,6 +11,7 @@ import com.example.weatherapp.R
 import com.example.weatherapp.domain.entity.WeatherCardDetails
 import com.example.weatherapp.presentation.state.mapper.WeatherUiState
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -54,22 +55,5 @@ object HomeScreenUtils {
             val palette = Palette.from(it).generate()
             Color(palette.getDominantColor(Color.Gray.toArgb()))
         } ?: Color.Gray
-    }
-
-    fun isToday(dateTimeString: String): Boolean {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
-
-        val todayFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        return try {
-            val date = inputFormat.parse(dateTimeString) ?: return false
-
-            val dateStr = todayFormat.format(date)
-            val todayStr = todayFormat.format(Date())
-
-            dateStr == todayStr
-        } catch (e: Exception) {
-            false
-        }
     }
 }

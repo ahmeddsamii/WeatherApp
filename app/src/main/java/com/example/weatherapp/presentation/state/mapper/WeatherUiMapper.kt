@@ -9,7 +9,7 @@ import com.example.weatherapp.domain.entity.DailyWeatherUnits
 import com.example.weatherapp.domain.entity.HourlyWeather
 import com.example.weatherapp.domain.entity.HourlyWeatherUnits
 import com.example.weatherapp.domain.entity.WeatherResponse
-import com.example.weatherapp.presentation.ui.utils.HomeScreenUtils
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -55,7 +55,7 @@ fun DailyWeather.toDailyWeatherUiState(units: DailyWeatherUnits): DailyWeatherUi
 fun HourlyWeather.toHourlyWeatherUiState(units: HourlyWeatherUnits): HourlyWeatherUiState {
     return HourlyWeatherUiState(
         temperatures = this.temperatures.map { "$it ${units.temperature}" },
-        times = this.times.filter { HomeScreenUtils.isToday(it) },
+        times = this.times.filter { isToday(it) },
         weatherCodes = this.weatherCodes,
         isDays = this.isDays,
         weatherIcons = this.weatherCodes.mapIndexed { index, code ->
@@ -142,4 +142,30 @@ fun getDayName(dateString: String): String {
 
     val date: Date = inputFormat.parse(dayInFormOfDate) ?: return ""
     return outputFormat.format(date)
+}
+
+fun isToday(dateTimeString: String): Boolean {
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
+    val todayFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    return try {
+        val inputDate = inputFormat.parse(dateTimeString) ?: return false
+        val now = Date()
+
+        val inputDateStr = todayFormat.format(inputDate)
+        val todayStr = todayFormat.format(now)
+
+        if (inputDateStr != todayStr) {
+            return false
+        }
+
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val inputCalendar = Calendar.getInstance().apply { time = inputDate }
+        val inputHour = inputCalendar.get(Calendar.HOUR_OF_DAY)
+
+        inputHour >= currentHour
+
+    } catch (e: Exception) {
+        false
+    }
 }
