@@ -32,22 +32,11 @@ fun WeatherInfoCard(
     weatherInfoTitle: String,
     weatherInfoImage: ImageVector,
     weatherInfoValue: String,
+    isDayHour: Int,
     modifier: Modifier = Modifier,
-    isDayHour: Int
 ) {
     Box(
         modifier = modifier
-            .height(115.dp)
-            .border(
-                width = 1.dp,
-                color = if (isDayHour == 1) Color(0x14060414) else Color(0x14FFFFFF),
-                shape = RoundedCornerShape(size = 24.dp)
-            )
-            .background(
-                color = if (isDayHour == 1) Color(0xB2FFFFFF) else Color(0xB2060414),
-                shape = RoundedCornerShape(size = 24.dp)
-            )
-            .fillMaxWidth()
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

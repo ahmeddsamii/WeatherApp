@@ -48,34 +48,12 @@ fun NextSevenDaysSection(
     maxTemperaturesOfDay: List<String>,
     minimumTemperaturesOfDay: List<String>,
     @DrawableRes weatherImages: List<Int>,
-    isDayHour: Int
+    isDayHour: Int,
+    modifier: Modifier = Modifier
 ) {
-    Text(
-        text = "Next 7 days",
-        style = TextStyle(
-            fontSize = 20.sp,
-            fontFamily = FontFamily(Font(R.font.urbanist_semi_bold)),
-            fontWeight = FontWeight(600),
-            color = if (isDayHour == 1) Color(0xFF060414) else Color.White,
-            letterSpacing = 0.25.sp,
-        ),
-        modifier = Modifier.padding(bottom = 12.dp, start = 12.dp)
-    )
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 32.dp)
-            .padding(horizontal = 12.dp)
-            .background(
-                color = if (isDayHour == 1) Color(0xB2FFFFFF) else Color(0x14060414),
-                shape = RoundedCornerShape(24.dp)
-            )
-            .border(
-                width = 1.dp,
-                color = if (isDayHour == 1) Color(0x14060414) else Color(0x14FFFFFF),
-                shape = RoundedCornerShape(size = 24.dp)
-            ),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         days.forEachIndexed { index, day ->
@@ -131,7 +109,8 @@ private fun NextSevenDaysRow(
                             .extractDominantColor(
                                 LocalContext.current,
                                 weatherIcon
-                            ).copy(alpha = 0.32f),
+                            ).copy(
+                                alpha = if (isDayHour == 1) 0.5f else 0.33f),
                         shape = CircleShape
                     )
             )

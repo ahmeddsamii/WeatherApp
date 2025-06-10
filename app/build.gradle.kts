@@ -65,8 +65,10 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.3.13")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
-    implementation ("com.google.android.gms:play-services-location:19.0.1")
+    implementation (libs.play.services.location)
 
     implementation("androidx.palette:palette:1.0.0")
+
+    implementation ("io.coil-kt:coil-compose:2.5.0")
 
 }

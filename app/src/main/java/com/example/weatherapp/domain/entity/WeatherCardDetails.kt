@@ -1,6 +1,6 @@
 package com.example.weatherapp.domain.entity
 
-data class WeatherDetails(
+data class WeatherCardDetails(
     val title: String,
     val value: String,
     val iconResId: Int

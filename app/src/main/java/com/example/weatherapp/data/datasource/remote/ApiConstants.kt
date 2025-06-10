@@ -1,4 +1,4 @@
-package com.example.weatherapp.data.datasource
+package com.example.weatherapp.data.datasource.remote
 
 object ApiConstants {
     const val WEATHER_HOST = "api.open-meteo.com"

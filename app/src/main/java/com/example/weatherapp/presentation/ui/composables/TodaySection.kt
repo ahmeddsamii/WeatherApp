@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -38,17 +39,6 @@ fun TodaySection(
     Box {
         Box(
             modifier
-                .border(
-                    width = 1.dp,
-                    color = if (isDayHour == 1) Color(0x14060414) else Color(0x14FFFFFF),
-                    shape = RoundedCornerShape(size = 20.dp)
-                )
-                .width(88.dp)
-                .height(120.dp)
-                .background(
-                    color = if (isDayHour == 1) Color(0xB2FFFFFF) else Color(0xB2060414),
-                    shape = RoundedCornerShape(size = 20.dp)
-                )
         ) {
             Column {
                 Column(
@@ -90,6 +80,7 @@ fun TodaySection(
                 .size(60.dp)
                 .align(Alignment.TopCenter)
                 .offset(y = (-12).dp),
+            contentScale = ContentScale.FillBounds
         )
     }
 }

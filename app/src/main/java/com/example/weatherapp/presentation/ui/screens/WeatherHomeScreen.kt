@@ -1,26 +1,33 @@
 package com.example.weatherapp.presentation.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -34,46 +41,95 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherapp.R
+import com.example.weatherapp.presentation.state.LocationState
 import com.example.weatherapp.presentation.state.WeatherResponseState
-import com.example.weatherapp.presentation.ui.composables.LocationText
+import com.example.weatherapp.presentation.ui.composables.CurrentLocationText
 import com.example.weatherapp.presentation.ui.composables.NextSevenDaysSection
 import com.example.weatherapp.presentation.ui.composables.TodaySection
 import com.example.weatherapp.presentation.ui.composables.WeatherInfoCard
 import com.example.weatherapp.presentation.ui.composables.WeatherInformation
-import com.example.weatherapp.presentation.ui.utils.HomeScreenUtils.getNextSevenDaysDate
-import com.example.weatherapp.presentation.ui.utils.HomeScreenUtils.getNextSevenDaysMaxTemperatures
-import com.example.weatherapp.presentation.ui.utils.HomeScreenUtils.getNextSevenDaysMinimumTemperatures
 import com.example.weatherapp.presentation.ui.utils.HomeScreenUtils.getWeatherInfoCardInformation
 import com.example.weatherapp.presentation.ui.utils.HomeScreenUtils.splitTodaySectionTime
 import org.koin.androidx.compose.koinViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherHomeScreen(
     viewModel: HomeScreenViewModel = koinViewModel()
 ) {
     val weatherState by viewModel.state.collectAsState()
+    val locationState by viewModel.locationState.collectAsState()
+
+    var locationText by remember { mutableStateOf("") }
+
+    val scrollState = rememberScrollState()
+
+    val isRow by remember {
+        derivedStateOf {
+            scrollState.value > 2
+        }
+    }
+
+    when (locationState) {
+        is LocationState.Initial -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = "Tap here to get your location",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .clickable {
+                            viewModel.onGetLocationClickListener()
+                        }
+                )
+            }
+        }
+
+        is LocationState.OnError -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = (locationState as LocationState.OnError).errorMessage,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .clickable {
+                            viewModel.onGetLocationClickListener()
+                        }
+                )
+            }
+        }
+
+        is LocationState.OnLoading -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+
+        is LocationState.OnSuccess -> {
+            locationText = (locationState as LocationState.OnSuccess).cityLocation.locationName
+        }
+    }
 
     when (weatherState) {
-        is WeatherResponseState.onError -> {}
-        WeatherResponseState.onLoading -> {}
-        is WeatherResponseState.onSuccess -> {
-            val weather = (weatherState as WeatherResponseState.onSuccess).weatherResponse
-            val currentIsDayHour = weather.current.is_day
-            val hourlyIsDayHour = weather.hourly.is_day
-            val currentTemperature = weather.current.temperature_2m
-            val currentTemperatureUnit = weather.current_units.temperature_2m
-            val currentWeatherCode = weather.current.weather_code
-            val hourlyWeatherCode = weather.hourly.weather_code
-            val daysWeatherCode = weather.daily.weather_code
+        is WeatherResponseState.Initial -> {}
 
-            val scrollState = rememberScrollState()
-
-            val isRow by remember {
-                derivedStateOf {
-                    scrollState.value > 20
-                }
+        is WeatherResponseState.OnError -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = (weatherState as WeatherResponseState.OnError).errorMessage,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
             }
+        }
+
+        is WeatherResponseState.OnLoading -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+
+        is WeatherResponseState.OnSuccess -> {
+            val weather = (weatherState as WeatherResponseState.OnSuccess).weatherResponse
+            val currentIsDayHour = weather.current.isDay
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -89,25 +145,21 @@ fun WeatherHomeScreen(
                     .verticalScroll(scrollState),
             ) {
 
-                LocationText(
-                    locationName = "ismailia",
-                    onTextClick = { },
-                    isDayHour = currentIsDayHour
+                CurrentLocationText(
+                    locationName = locationText,
+                    onTextClick = {viewModel.onGetLocationClickListener() },
+                    isDayHour = currentIsDayHour,
+                    modifier = Modifier
+                        .padding(top = 64.dp)
+                        .fillMaxWidth()
                 )
 
                 WeatherInformation(
-                    icon = viewModel.getIconsByWeatherCode(
-                            weather.current.weather_code.toString(),
-                            isDayHour = currentIsDayHour
-                    ),
-                    currentTemperature = "$currentTemperature $currentTemperatureUnit",
-                    weatherStatus = viewModel.getWeatherStatusByWeatherCode(
-                        currentWeatherCode.toString()
-                    ),
-                    maxTemperatureOfTheDay =
-                    "${weather.daily.temperature_2m_max.first()} ${weather.daily_units.temperature_2m_max}",
-                    minimumTemperatureOfTheDay =
-                    "${weather.daily.temperature_2m_min.first()} ${weather.daily_units.temperature_2m_min}",
+                    icon = weather.current.weatherIcon,
+                    currentTemperature = weather.current.temperature,
+                    weatherStatus = weather.current.weatherStatus,
+                    maxTemperatureOfTheDay = weather.daily.maxTemperatures.first(),
+                    minimumTemperatureOfTheDay = weather.daily.minimumTemperatures.first(),
                     isDayHour = currentIsDayHour,
                     isRow = isRow
                 )
@@ -129,7 +181,23 @@ fun WeatherHomeScreen(
                                 getWeatherInfoCardInformation(weather)[it].iconResId
                             ),
                             weatherInfoValue = getWeatherInfoCardInformation(weather)[it].value,
-                            isDayHour = currentIsDayHour
+                            isDayHour = currentIsDayHour,
+                            modifier = Modifier
+                                .height(115.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color = if (currentIsDayHour == 1) Color(0x14060414) else Color(
+                                        0x14FFFFFF
+                                    ),
+                                    shape = RoundedCornerShape(size = 24.dp)
+                                )
+                                .background(
+                                    color = if (currentIsDayHour == 1) Color(0xB2FFFFFF) else Color(
+                                        0xB2060414
+                                    ),
+                                    shape = RoundedCornerShape(size = 24.dp)
+                                )
+                                .fillMaxWidth()
                         )
                     }
                 }
@@ -141,7 +209,6 @@ fun WeatherHomeScreen(
                         fontFamily = FontFamily(Font(R.font.urbanist_semi_bold)),
                         fontWeight = FontWeight(600),
                         color = if (currentIsDayHour == 1) Color(0xFF060414) else Color.White,
-                        letterSpacing = 0.25.sp,
                     ),
                     modifier = Modifier.padding(start = 12.dp, top = 24.dp)
                 )
@@ -150,32 +217,68 @@ fun WeatherHomeScreen(
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(weather.hourly.time.size) {
+                    items(weather.hourly.times.size) {
                         TodaySection(
                             weatherImage = painterResource(
-                                viewModel.getIconsByWeatherCode(
-                                    hourlyWeatherCode[it].toString(),
-                                    hourlyIsDayHour[it]
-                                )
+                                weather.hourly.weatherIcons[it]
                             ),
-                            weatherTemperature = "${weather.hourly.temperature_2m[it]} ${weather.hourly_units.temperature_2m}",
-                            currentHour = splitTodaySectionTime(weather.hourly.time[it]),
-                            isDayHour = currentIsDayHour
+                            weatherTemperature = weather.hourly.temperatures[it],
+                            currentHour = splitTodaySectionTime(weather.hourly.times[it]),
+                            isDayHour = currentIsDayHour,
+                            modifier = Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = if (currentIsDayHour == 1) Color(0x14060414) else Color(
+                                        0x14FFFFFF
+                                    ),
+                                    shape = RoundedCornerShape(size = 20.dp)
+                                )
+                                .width(88.dp)
+                                .height(120.dp)
+                                .background(
+                                    color = if (currentIsDayHour == 1) Color(0xB2FFFFFF) else Color(
+                                        0xB2060414
+                                    ),
+                                    shape = RoundedCornerShape(size = 20.dp)
+                                )
                         )
                     }
                 }
 
+                Text(
+                    text = "Next 7 days",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontFamily = FontFamily(Font(R.font.urbanist_semi_bold)),
+                        fontWeight = FontWeight(600),
+                        color = if (currentIsDayHour == 1) Color(0xFF060414) else Color.White,
+                    ),
+                    modifier = Modifier.padding(bottom = 12.dp, start = 12.dp)
+                )
+
                 NextSevenDaysSection(
-                    days = getNextSevenDaysDate(weather),
-                    maxTemperaturesOfDay = getNextSevenDaysMaxTemperatures(weather),
-                    minimumTemperaturesOfDay = getNextSevenDaysMinimumTemperatures(weather),
-                    weatherImages = List(daysWeatherCode.size) {
-                            viewModel.getIconsByWeatherCode(
-                                daysWeatherCode[it].toString(),
-                                1
-                            )
-                    },
-                    isDayHour = currentIsDayHour
+                    days = weather.daily.times,
+                    maxTemperaturesOfDay = weather.daily.maxTemperatures,
+                    minimumTemperaturesOfDay = weather.daily.minimumTemperatures,
+                    weatherImages = weather.daily.weatherIcons,
+                    isDayHour = currentIsDayHour,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 32.dp)
+                        .padding(horizontal = 12.dp)
+                        .background(
+                            color = if (currentIsDayHour == 1) Color(0xB2FFFFFF) else Color(
+                                0x14060414
+                            ),
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (currentIsDayHour == 1) Color(0x14060414) else Color(
+                                0x14FFFFFF
+                            ),
+                            shape = RoundedCornerShape(size = 24.dp)
+                        )
                 )
             }
         }
