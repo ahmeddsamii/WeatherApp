@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class HomeScreenViewModel(
     private val getWeatherUseCase: GetWeatherUseCase,
     private val locationRepository: LocationRepository
-) : ViewModel() {
+) : ViewModel(), InteractionListener {
 
     private val _state = MutableStateFlow<WeatherResponseState>(WeatherResponseState.Initial)
     val state = _state.asStateFlow()
@@ -36,7 +36,7 @@ class HomeScreenViewModel(
         }
     }
 
-    fun onGetLocationClickListener() {
+    override fun onGetLocationClickListener() {
         _locationState.value = LocationState.OnLoading
         locationRepository.getLocation(
             onSuccess = { location, locationAsText ->

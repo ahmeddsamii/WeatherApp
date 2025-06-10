@@ -12,7 +12,6 @@ import kotlinx.serialization.json.Json
 class WeatherRemoteDataSourceImpl(
     private val ktorClient: HttpClient
 ) : RemoteDataSource {
-
     override suspend fun getWeatherByLocation(cityLocation: CityLocation): WeatherResponseDto {
         val response = ktorClient.get {
             url {
@@ -28,7 +27,6 @@ class WeatherRemoteDataSourceImpl(
                 parameters.append("timezone", ApiConstants.TIMEZONE)
             }
         }
-
 
         return Json.decodeFromString<WeatherResponseDto>(response.bodyAsText())
     }

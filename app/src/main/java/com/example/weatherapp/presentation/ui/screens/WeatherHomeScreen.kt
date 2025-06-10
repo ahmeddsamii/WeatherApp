@@ -59,6 +59,15 @@ fun WeatherHomeScreen(
     val weatherState by viewModel.state.collectAsState()
     val locationState by viewModel.locationState.collectAsState()
 
+    WeatherHomeScreenContent(weatherState, locationState, viewModel)
+}
+
+@Composable
+fun WeatherHomeScreenContent(
+    weatherState: WeatherResponseState,
+    locationState: LocationState,
+    listener: InteractionListener
+) {
     var locationText by remember { mutableStateOf("") }
 
     val scrollState = rememberScrollState()
@@ -72,27 +81,23 @@ fun WeatherHomeScreen(
     when (locationState) {
         is LocationState.Initial -> {
             Box(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = "Tap here to get your location",
+                Text(text = "Tap here to get your location",
                     modifier = Modifier
                         .align(Alignment.Center)
                         .clickable {
-                            viewModel.onGetLocationClickListener()
-                        }
-                )
+                            listener.onGetLocationClickListener()
+                        })
             }
         }
 
         is LocationState.OnError -> {
             Box(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = (locationState as LocationState.OnError).errorMessage,
+                Text(text = locationState.errorMessage,
                     modifier = Modifier
                         .align(Alignment.Center)
                         .clickable {
-                            viewModel.onGetLocationClickListener()
-                        }
-                )
+                            listener.onGetLocationClickListener()
+                        })
             }
         }
 
@@ -103,7 +108,7 @@ fun WeatherHomeScreen(
         }
 
         is LocationState.OnSuccess -> {
-            locationText = (locationState as LocationState.OnSuccess).cityLocation.locationName
+            locationText = locationState.cityLocation.locationName
         }
     }
 
@@ -113,9 +118,8 @@ fun WeatherHomeScreen(
         is WeatherResponseState.OnError -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 Text(
-                    text = (weatherState as WeatherResponseState.OnError).errorMessage,
-                    modifier = Modifier
-                        .align(Alignment.Center)
+                    text = weatherState.errorMessage,
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
         }
@@ -127,7 +131,7 @@ fun WeatherHomeScreen(
         }
 
         is WeatherResponseState.OnSuccess -> {
-            val weather = (weatherState as WeatherResponseState.OnSuccess).weatherResponse
+            val weather = weatherState.weatherResponse
             val currentIsDayHour = weather.current.isDay
 
             Column(
@@ -147,7 +151,7 @@ fun WeatherHomeScreen(
 
                 CurrentLocationText(
                     locationName = locationText,
-                    onTextClick = { viewModel.onGetLocationClickListener() },
+                    onTextClick = { listener.onGetLocationClickListener() },
                     isDayHour = currentIsDayHour,
                     modifier = Modifier
                         .padding(top = 64.dp)
@@ -194,8 +198,7 @@ fun WeatherHomeScreen(
                                 .background(
                                     color = if (currentIsDayHour == 1) Color(0xB2FFFFFF) else Color(
                                         0xB2060414
-                                    ),
-                                    shape = RoundedCornerShape(size = 24.dp)
+                                    ), shape = RoundedCornerShape(size = 24.dp)
                                 )
                                 .fillMaxWidth()
                         )
@@ -203,14 +206,12 @@ fun WeatherHomeScreen(
                 }
 
                 Text(
-                    text = "Today",
-                    style = TextStyle(
+                    text = "Today", style = TextStyle(
                         fontSize = 20.sp,
                         fontFamily = FontFamily(Font(R.font.urbanist_semi_bold)),
                         fontWeight = FontWeight(600),
                         color = if (currentIsDayHour == 1) Color(0xFF060414) else Color.White,
-                    ),
-                    modifier = Modifier.padding(start = 12.dp, top = 24.dp)
+                    ), modifier = Modifier.padding(start = 12.dp, top = 24.dp)
                 )
 
                 LazyRow(
@@ -238,22 +239,19 @@ fun WeatherHomeScreen(
                                 .background(
                                     color = if (currentIsDayHour == 1) Color(0xB2FFFFFF) else Color(
                                         0xB2060414
-                                    ),
-                                    shape = RoundedCornerShape(size = 20.dp)
+                                    ), shape = RoundedCornerShape(size = 20.dp)
                                 )
                         )
                     }
                 }
 
                 Text(
-                    text = "Next 7 days",
-                    style = TextStyle(
+                    text = "Next 7 days", style = TextStyle(
                         fontSize = 20.sp,
                         fontFamily = FontFamily(Font(R.font.urbanist_semi_bold)),
                         fontWeight = FontWeight(600),
                         color = if (currentIsDayHour == 1) Color(0xFF060414) else Color.White,
-                    ),
-                    modifier = Modifier.padding(bottom = 12.dp, start = 12.dp)
+                    ), modifier = Modifier.padding(bottom = 12.dp, start = 12.dp)
                 )
 
                 NextSevenDaysSection(
@@ -269,8 +267,7 @@ fun WeatherHomeScreen(
                         .background(
                             color = if (currentIsDayHour == 1) Color(0xB2FFFFFF) else Color(
                                 0x14060414
-                            ),
-                            shape = RoundedCornerShape(24.dp)
+                            ), shape = RoundedCornerShape(24.dp)
                         )
                         .border(
                             width = 1.dp,
