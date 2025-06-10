@@ -2,12 +2,12 @@ package com.example.weatherapp.presentation.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.data.datasource.location.GpsLocation
 import com.example.weatherapp.domain.entity.CityLocation
 import com.example.weatherapp.domain.repo.LocationRepository
 import com.example.weatherapp.domain.usecase.GetWeatherUseCase
 import com.example.weatherapp.presentation.state.LocationState
 import com.example.weatherapp.presentation.state.WeatherResponseState
+import com.example.weatherapp.presentation.state.mapper.toWeatherUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +31,7 @@ class HomeScreenViewModel(
             getWeatherUseCase.getWeather(cityLocation).catch {
                 _state.value = WeatherResponseState.OnError(it.message ?: "UnExceptedError")
             }.collect {
-                _state.value = WeatherResponseState.OnSuccess(it)
+                _state.value = WeatherResponseState.OnSuccess(it.toWeatherUiState())
             }
         }
     }

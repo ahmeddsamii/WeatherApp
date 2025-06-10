@@ -9,7 +9,7 @@ data class CurrentUnitsDto(
     val is_day: String,
     val precipitation: String,
     val pressure_msl: String,
-    val rain: String,
+    val precipitation_probability: String,
     val relative_humidity_2m: String,
     val temperature_2m: String,
     val time: String,

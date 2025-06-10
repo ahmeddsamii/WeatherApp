@@ -9,7 +9,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.palette.graphics.Palette
 import com.example.weatherapp.R
 import com.example.weatherapp.domain.entity.WeatherCardDetails
-import com.example.weatherapp.domain.entity.WeatherResponse
+import com.example.weatherapp.presentation.state.mapper.WeatherUiState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -21,26 +21,26 @@ object HomeScreenUtils {
     }
 
     fun getWeatherInfoCardInformation(
-        weatherResponse: WeatherResponse,
+        weather: WeatherUiState,
     ): List<WeatherCardDetails> {
         return listOf(
             WeatherCardDetails(
-                title = "Wind", value = weatherResponse.current.windSpeed, iconResId = R.drawable.fast_wind
+                title = "Wind", value = weather.current.windSpeed, iconResId = R.drawable.fast_wind
             ), WeatherCardDetails(
                 title = "Humidity",
-                value = weatherResponse.current.humidity,
+                value = weather.current.humidity,
                 iconResId = R.drawable.humidity
             ), WeatherCardDetails(
-                title = "Rain", value = weatherResponse.current.rain, iconResId = R.drawable.rain
+                title = "Rain", value = weather.current.rain, iconResId = R.drawable.rain
             ), WeatherCardDetails(
-                title = "UV Index", value = weatherResponse.current.uvIndex, iconResId = R.drawable.uv_index
+                title = "UV Index", value = weather.current.uvIndex, iconResId = R.drawable.uv_index
             ), WeatherCardDetails(
                 title = "Pressure",
-                value = weatherResponse.current.pressure,
+                value = weather.current.pressure,
                 iconResId = R.drawable.pressure
             ), WeatherCardDetails(
                 title = "Feels like",
-                value = weatherResponse.current.feelsLike,
+                value = weather.current.feelsLike,
                 iconResId = R.drawable.feels_like
             )
         )
@@ -55,7 +55,6 @@ object HomeScreenUtils {
             Color(palette.getDominantColor(Color.Gray.toArgb()))
         } ?: Color.Gray
     }
-
 
     fun isToday(dateTimeString: String): Boolean {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())

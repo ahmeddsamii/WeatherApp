@@ -1,13 +1,7 @@
-package com.example.weatherapp.data.repo.mapper
+package com.example.weatherapp.presentation.state.mapper
 
+import android.icu.text.SimpleDateFormat
 import com.example.weatherapp.R
-import com.example.weatherapp.data.dto.CurrentDto
-import com.example.weatherapp.data.dto.CurrentUnitsDto
-import com.example.weatherapp.data.dto.DailyDto
-import com.example.weatherapp.data.dto.DailyUnitsDto
-import com.example.weatherapp.data.dto.HourlyDto
-import com.example.weatherapp.data.dto.HourlyUnitsDto
-import com.example.weatherapp.data.dto.WeatherResponseDto
 import com.example.weatherapp.domain.entity.CurrentUnits
 import com.example.weatherapp.domain.entity.CurrentWeather
 import com.example.weatherapp.domain.entity.DailyWeather
@@ -15,80 +9,59 @@ import com.example.weatherapp.domain.entity.DailyWeatherUnits
 import com.example.weatherapp.domain.entity.HourlyWeather
 import com.example.weatherapp.domain.entity.HourlyWeatherUnits
 import com.example.weatherapp.domain.entity.WeatherResponse
-import java.text.SimpleDateFormat
+import com.example.weatherapp.presentation.ui.utils.HomeScreenUtils
 import java.util.Date
 import java.util.Locale
 
-fun WeatherResponseDto.toWeatherResponse(): WeatherResponse {
-    return WeatherResponse(
-        current = this.current.toCurrentWeather(),
-        currentUnits = this.current_units.toCurrentUnit(),
-        daily = this.daily.toDailyWeather(),
-        dailyUnits = this.daily_units.toDailyWeatherUnits(),
-        hourly = this.hourly.toHourly(),
-        hourlyUnits = this.hourly_units.toHourlyWeatherUnits()
+fun WeatherResponse.toWeatherUiState(): WeatherUiState {
+    return WeatherUiState(
+        current = this.current.toCurrentWeatherUiState(this.currentUnits),
+        daily = this.daily.toDailyWeatherUiState(this.dailyUnits),
+        hourly = this.hourly.toHourlyWeatherUiState(this.hourlyUnits)
     )
 }
 
-fun CurrentDto.toCurrentWeather(): CurrentWeather {
-    return CurrentWeather(
-        feelsLike = this.apparent_temperature,
-        isDay = this.is_day,
-        pressure = this.pressure_msl,
-        rain = this.precipitation_probability,
-        humidity = this.relative_humidity_2m,
-        temperature = this.temperature_2m,
+fun CurrentWeather.toCurrentWeatherUiState(units: CurrentUnits): CurrentWeatherUiState {
+    return CurrentWeatherUiState(
+        weatherIcon = getIconsByWeatherCode(this.weatherCode.toString(), this.isDay),
+        weatherStatus = getWeatherStatusByWeatherCode(this.weatherCode.toString()),
+        feelsLike = "${this.feelsLike} ${units.feelsLike}",
+        isDay = this.isDay,
+        pressure = "${this.pressure} ${units.pressure}",
+        rain = "${this.rain} ${units.rain}",
+        humidity = "${this.humidity} ${units.humidity}",
+        temperature = "${this.temperature} ${units.temperature}",
         time = this.time,
-        uvIndex = this.uv_index,
-        weatherCode = this.weather_code,
-        windSpeed = this.wind_speed_10m
+        uvIndex = "${this.uvIndex} ${units.uvIndex}",
+        weatherCode = this.weatherCode,
+        windSpeed = "${this.windSpeed} ${units.windSpeed}"
+
     )
 }
 
-fun CurrentUnitsDto.toCurrentUnit(): CurrentUnits {
-    return CurrentUnits(
-        feelsLike = this.apparent_temperature,
-        isDay = this.is_day,
-        pressure = this.pressure_msl,
-        rain = this.precipitation_probability,
-        humidity = this.relative_humidity_2m,
-        temperature = this.temperature_2m,
-        time = this.time,
-        uvIndex = this.uv_index,
-        windSpeed = this.wind_speed_10m
+fun DailyWeather.toDailyWeatherUiState(units: DailyWeatherUnits): DailyWeatherUiState {
+    return DailyWeatherUiState(
+        weatherIcons = this.weatherCodes.map { code ->
+            getIconsByWeatherCode(code.toString(), 1)
+        },
+        maxTemperatures = this.maxTemperatures.map { "$it ${units.maxTemperatures}" },
+        minimumTemperatures = this.minimumTemperatures.map { "$it ${units.minimumTemperatures}" },
+        times = this.times.map { getDayName(it) },
+        weatherCodes = this.weatherCodes
+
     )
 }
 
-fun DailyDto.toDailyWeather(): DailyWeather {
-    return DailyWeather(
-        maxTemperatures = this.temperature_2m_max,
-        minimumTemperatures = this.temperature_2m_min,
-        times = this.time,
-        weatherCodes = this.weather_code
-    )
-}
+fun HourlyWeather.toHourlyWeatherUiState(units: HourlyWeatherUnits): HourlyWeatherUiState {
+    return HourlyWeatherUiState(
+        temperatures = this.temperatures.map { "$it ${units.temperature}" },
+        times = this.times.filter { HomeScreenUtils.isToday(it) },
+        weatherCodes = this.weatherCodes,
+        isDays = this.isDays,
+        weatherIcons = this.weatherCodes.mapIndexed { index, code ->
+            getIconsByWeatherCode(code.toString(), this.isDays[index])
+        }
 
-fun DailyUnitsDto.toDailyWeatherUnits(): DailyWeatherUnits {
-    return DailyWeatherUnits(
-        rain = this.rain_sum,
-        maxTemperatures = this.temperature_2m_max,
-        minimumTemperatures = this.temperature_2m_min,
-        time = this.time,
-    )
-}
-
-fun HourlyDto.toHourly(): HourlyWeather {
-    return HourlyWeather(
-        temperatures = this.temperature_2m,
-        times = this.time,
-        weatherCodes = this.weather_code,
-        isDays = this.is_day,
-    )
-}
-
-fun HourlyUnitsDto.toHourlyWeatherUnits(): HourlyWeatherUnits {
-    return HourlyWeatherUnits(
-        temperature = this.temperature_2m
     )
 }
 

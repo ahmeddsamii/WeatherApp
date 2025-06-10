@@ -147,7 +147,7 @@ fun WeatherHomeScreen(
 
                 CurrentLocationText(
                     locationName = locationText,
-                    onTextClick = {viewModel.onGetLocationClickListener() },
+                    onTextClick = { viewModel.onGetLocationClickListener() },
                     isDayHour = currentIsDayHour,
                     modifier = Modifier
                         .padding(top = 64.dp)

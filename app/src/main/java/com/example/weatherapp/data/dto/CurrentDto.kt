@@ -9,7 +9,7 @@ data class CurrentDto(
     val is_day: Int,
     val precipitation: Double,
     val pressure_msl: Double,
-    val rain: Double,
+    val precipitation_probability: Int,
     val relative_humidity_2m: Int,
     val temperature_2m: Double,
     val time: String,
